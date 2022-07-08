@@ -72,11 +72,11 @@ class TutorialFragment : Fragment() {
     private val parentJob = Job()
     private val coroutineScope = CoroutineScope(Dispatchers.Main + parentJob + coroutineExceptionHandler)
     private lateinit var imageFiltered: ImageView
-    private fun getOriginalBitmapAsync(tutorial: Tutorial): Deferred<Bitmap> =
 
-        coroutineScope.async(Dispatchers.IO) {
+    private suspend fun getOriginalBitmapAsync(tutorial: Tutorial): Bitmap =
+        withContext(Dispatchers.IO) {
             URL(tutorial.url).openStream().use {
-                return@async BitmapFactory.decodeStream(it)
+                return@withContext BitmapFactory.decodeStream(it)
             }
         }
 
@@ -92,8 +92,8 @@ class TutorialFragment : Fragment() {
         return view
     }
 
-    private fun loadSnowFilterAsync(originalBitmap: Bitmap): Deferred<Bitmap> =
-        coroutineScope.async(Dispatchers.Default) {
+    private suspend fun loadSnowFilterAsync(originalBitmap: Bitmap): Bitmap =
+        withContext(Dispatchers.Default) {
             SnowFilter.applySnowEffect(originalBitmap)
         }
 
@@ -101,8 +101,8 @@ class TutorialFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val tutorial = arguments?.getParcelable<Tutorial>(TUTORIAL_KEY) as Tutorial
         coroutineScope.launch(Dispatchers.Main) {
-            val bitmapEffected =
-                SnowFilter.applySnowEffect(getOriginalBitmapAsync(tutorial).await())
+            val bitmap = loadSnowFilterAsync(getOriginalBitmapAsync(tutorial))
+            val bitmapEffected = SnowFilter.applySnowEffect(bitmap)
             imageFiltered.setImageBitmap(bitmapEffected)
         }
     }
