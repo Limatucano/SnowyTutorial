@@ -80,6 +80,11 @@ class TutorialFragment : Fragment() {
     return view
   }
 
+  private fun loadSnowFilterAsync(originalBitmap: Bitmap): Deferred<Bitmap> =
+    coroutineScope.async(Dispatchers.Default) {
+      SnowFilter.applySnowEffect(originalBitmap)
+    }
+
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     val tutorial = arguments?.getParcelable<Tutorial>(TUTORIAL_KEY) as Tutorial
@@ -87,8 +92,5 @@ class TutorialFragment : Fragment() {
       val bitmapEffected = SnowFilter.applySnowEffect(getOriginalBitmapAsync(tutorial).await())
       imageFiltered.setImageBitmap(bitmapEffected)
     }
-
-
-
   }
 }
