@@ -78,12 +78,12 @@
     android:visibility="gone" />
 
   <ImageView
-    android:id="@+id/snowFilterImage"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerInParent="true"
-    android:layout_marginTop="10dp"
-    android:layout_below="@+id/tutorialDesc"
-    tools:src="@mipmap/ic_launcher" />
+      android:id="@+id/snowFilterImage"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/tutorialDesc"
+      android:layout_centerInParent="true"
+      android:layout_marginTop="10dp"
+      tools:src="@mipmap/ic_launcher" />
 
 </RelativeLayout>

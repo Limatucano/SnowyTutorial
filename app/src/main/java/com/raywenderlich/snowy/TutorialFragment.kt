@@ -30,13 +30,19 @@
 
 package com.raywenderlich.snowy
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.raywenderlich.snowy.model.Tutorial
+import com.raywenderlich.snowy.utils.SnowFilter
+import kotlinx.coroutines.*
+import java.net.URL
 
 class TutorialFragment : Fragment() {
 
@@ -53,17 +59,36 @@ class TutorialFragment : Fragment() {
     }
   }
 
+  private val parentJob = Job()
+  private val coroutineScope = CoroutineScope(Dispatchers.Main + parentJob)
+  private lateinit var imageFiltered : ImageView
+  private fun getOriginalBitmapAsync(tutorial: Tutorial): Deferred<Bitmap> =
+
+    coroutineScope.async(Dispatchers.IO) {
+      URL(tutorial.url).openStream().use {
+        return@async BitmapFactory.decodeStream(it)
+      }
+    }
+
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                             savedInstanceState: Bundle?): View? {
-    val tutorial = arguments?.getParcelable(TUTORIAL_KEY) as Tutorial
+    val tutorial = arguments?.getParcelable<Tutorial>(TUTORIAL_KEY) as Tutorial
     val view = inflater.inflate(R.layout.fragment_tutorial, container, false)
     view.findViewById<TextView>(R.id.tutorialName).text = tutorial.name
     view.findViewById<TextView>(R.id.tutorialDesc).text = tutorial.description
+    imageFiltered = view.findViewById(R.id.snowFilterImage)
     return view
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    val tutorial = arguments?.getParcelable(TUTORIAL_KEY) as Tutorial
+    val tutorial = arguments?.getParcelable<Tutorial>(TUTORIAL_KEY) as Tutorial
+    coroutineScope.launch(Dispatchers.Main) {
+      val bitmapEffected = SnowFilter.applySnowEffect(getOriginalBitmapAsync(tutorial).await())
+      imageFiltered.setImageBitmap(bitmapEffected)
+    }
+
+
+
   }
 }
